@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Directory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        
+        .card-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .user-card {
+            background: linear-gradient(145deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .user-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.25);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -8px rgba(99, 102, 241, 0.5);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .select-custom {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+        
+        .select-custom:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .select-custom option {
+            background: #1e293b;
+            color: #f1f5f9;
+        }
+        
+        .avatar-ring {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            padding: 3px;
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .loading-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full gradient-bg text-white overflow-auto">
+  <div class="min-h-full w-full p-6 md:p-8" style="font-family: 'DM Sans', sans-serif;"><!-- Header -->
+   <header class="text-center mb-10">
+    <h1 id="app-title" class="text-4xl md:text-5xl font-bold mb-3" style="font-family: 'Space Grotesk', sans-serif; background: linear-gradient(135deg, #fff 0%, #c7d2fe 100%); background-clip: text; -webkit-text-fill-color: transparent;">User Directory</h1>
+    <p class="text-slate-400 text-lg">Browse and search through our user database</p>
+   </header><!-- Search Section -->
+   <div class="max-w-2xl mx-auto mb-10">
+    <div class="card-glass rounded-2xl p-6"><label for="user-id-input" class="block text-sm font-medium text-slate-300 mb-3">
+      <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg> Search by User ID </label>
+     <div class="flex gap-3"><input type="number" id="user-id-input" placeholder="Enter user ID (1-12)" min="1" max="12" class="input-field flex-1 px-4 py-3 rounded-xl text-white placeholder-slate-500 outline-none"> <button id="search-btn" class="btn-primary px-6 py-3 rounded-xl font-semibold text-white flex items-center gap-2">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+       </svg> Search </button>
+     </div><!-- Search Result -->
+     <div id="search-result" class="mt-6 hidden">
+     </div>
+    </div>
+   </div><!-- Dropdown Section -->
+   <div class="max-w-2xl mx-auto mb-10">
+    <div class="card-glass rounded-2xl p-6"><label for="users-select" class="block text-sm font-medium text-slate-300 mb-3">
+      <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg> Quick Select User </label> <select id="users-select" class="select-custom w-full px-4 py-3 rounded-xl text-white outline-none cursor-pointer"> <option value="">Loading users...</option> </select> <!-- Selected User Details -->
+     <div id="selected-user-details" class="mt-6 hidden">
+     </div>
+    </div>
+   </div><!-- All Users Grid -->
+   <div class="max-w-6xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6 text-center" style="font-family: 'Space Grotesk', sans-serif;">
+     <svg class="w-6 h-6 inline-block mr-2 text-indigo-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v1" />
+     </svg> All Users</h2>
+    <div id="users-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"><!-- Loading skeletons -->
+     <div class="skeleton h-40 rounded-2xl"></div>
+     <div class="skeleton h-40 rounded-2xl"></div>
+     <div class="skeleton h-40 rounded-2xl"></div>
+     <div class="skeleton h-40 rounded-2xl"></div>
+     <div class="skeleton h-40 rounded-2xl"></div>
+     <div class="skeleton h-40 rounded-2xl"></div>
+    </div>
+   </div><!-- Toast Notification -->
+   <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-red-500/90 backdrop-blur-sm text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
+     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+     </svg><span id="toast-message">Error message</span>
+    </div>
+   </div>
+  </div>
+  <script>
+        // Default configuration
+        const defaultConfig = {
+            app_title: 'User Directory',
+            search_placeholder: 'Enter user ID (1-12)',
+            primary_color: '#6366f1',
+            secondary_color: '#8b5cf6',
+            background_color: '#0f172a',
+            text_color: '#ffffff',
+            card_color: '#1e293b'
+        };
+
+        let config = { ...defaultConfig };
+
+        // Element SDK initialization
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange: async (newConfig) => {
+                    config = { ...defaultConfig, ...newConfig };
+                    
+                    // Update title
+                    const titleEl = document.getElementById('app-title');
+                    if (titleEl) {
+                        titleEl.textContent = config.app_title || defaultConfig.app_title;
+                    }
+                    
+                    // Update search placeholder
+                    const searchInput = document.getElementById('user-id-input');
+                    if (searchInput) {
+                        searchInput.placeholder = config.search_placeholder || defaultConfig.search_placeholder;
+                    }
+                },
+                mapToCapabilities: (cfg) => ({
+                    recolorables: [],
+                    borderables: [],
+                    fontEditable: undefined,
+                    fontSizeable: undefined
+                }),
+                mapToEditPanelValues: (cfg) => new Map([
+                    ['app_title', cfg.app_title || defaultConfig.app_title],
+                    ['search_placeholder', cfg.search_placeholder || defaultConfig.search_placeholder]
+                ])
+            });
+        }
+
+        // API fetch function
+        function getData(api) {
+            return new Promise((resolve, reject) => {
+                let xhr = new XMLHttpRequest();
+                xhr.onload = () => {
+                    try {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            resolve(JSON.parse(xhr.responseText));
+                        } else {
+                            throw new Error("User not found");
+                        }
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                xhr.onerror = () => reject(new Error("Network error"));
+                xhr.open("GET", api);
+                xhr.send();
+            });
+        }
+
+        // Show toast notification
+        function showToast(message, isError = true) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastBg = toast.querySelector('div');
+            
+            toastMessage.textContent = message;
+            toastBg.className = isError 
+                ? 'bg-red-500/90 backdrop-blur-sm text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3'
+                : 'bg-emerald-500/90 backdrop-blur-sm text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3';
+            
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Create user card HTML
+        function createUserCard(user, animate = false) {
+            const avatarUrl = user.profileImg || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff&size=100`;
+            return `
+                <div class="user-card rounded-2xl p-5 ${animate ? 'fade-in' : ''}">
+                    <div class="flex items-start gap-4">
+                        <div class="avatar-ring rounded-full flex-shrink-0">
+                            <img 
+                                src="${avatarUrl}" 
+                                alt="${user.name}'s avatar"
+                                class="w-14 h-14 rounded-full object-cover"
+                                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff&size=100'; this.alt='Avatar fallback';"
+                            >
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-lg text-white truncate">${user.name}</h3>
+                            <p class="text-slate-400 text-sm truncate flex items-center gap-2 mt-1">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <span class="truncate">${user.email}</span>
+                            </p>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-indigo-500/20 text-indigo-300 text-xs rounded-full">
+                                    ID: ${user.id}
+                                </span>
+                                ${user.phone ? `
+                                <span class="px-3 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full truncate max-w-[150px]">
+                                    ${user.phone}
+                                </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Create detailed user view
+        function createDetailedUserView(user) {
+            const avatarUrl = user.profileImg || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff&size=150`;
+            const fields = Object.entries(user).filter(([key]) => key !== 'id' && key !== 'profileImg');
+            
+            return `
+                <div class="user-card rounded-xl p-6 fade-in">
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div class="avatar-ring rounded-full flex-shrink-0">
+                            <img 
+                                src="${avatarUrl}" 
+                                alt="${user.name}'s avatar"
+                                class="w-20 h-20 rounded-full object-cover"
+                                onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff&size=150'; this.alt='Avatar fallback';"
+                            >
+                        </div>
+                        <div class="flex-1 text-center sm:text-left">
+                            <h3 class="font-bold text-xl text-white">${user.name}</h3>
+                            <p class="text-indigo-300 text-sm">User ID: ${user.id}</p>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-5 border-t border-slate-700/50 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${fields.map(([key, value]) => `
+                            <div class="flex items-center gap-3 text-sm">
+                                <span class="text-slate-500 capitalize font-medium">${key}:</span>
+                                <span class="text-slate-300 truncate">${value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize the app
+        async function init() {
+            const select = document.getElementById('users-select');
+            const usersGrid = document.getElementById('users-grid');
+            const searchBtn = document.getElementById('search-btn');
+            const searchInput = document.getElementById('user-id-input');
+            const searchResult = document.getElementById('search-result');
+            const selectedUserDetails = document.getElementById('selected-user-details');
+
+            // Load all users
+            try {
+                const users = await getData("https://developerapis.vercel.app/api/users/");
+                
+                // Populate dropdown
+                select.innerHTML = '<option value="">-- Select a user --</option>';
+                for (let i = 0; i <= 12 && i < users.length; i++) {
+                    const option = document.createElement('option');
+                    option.value = users[i].id;
+                    option.text = `${users[i].name} - ${users[i].email}`;
+                    select.appendChild(option);
+                }
+
+                // Populate grid
+                usersGrid.innerHTML = '';
+                for (let i = 0; i <= 12 && i < users.length; i++) {
+                    usersGrid.innerHTML += createUserCard(users[i]);
+                }
+            } catch (error) {
+                showToast('Failed to load users');
+                select.innerHTML = '<option value="">Failed to load users</option>';
+                usersGrid.innerHTML = '<div class="col-span-full text-center text-slate-400 py-10">Failed to load users. Please try again later.</div>';
+            }
+
+            // Search functionality
+            async function performSearch() {
+                const userId = searchInput.value.trim();
+                if (!userId) {
+                    showToast('Please enter a user ID');
+                    return;
+                }
+
+                searchResult.innerHTML = '<div class="loading-pulse text-slate-400 text-center py-4">Searching...</div>';
+                searchResult.classList.remove('hidden');
+
+                try {
+                    const user = await getData(`https://developerapis.vercel.app/api/users/user-${userId}`);
+                    searchResult.innerHTML = createDetailedUserView(user);
+                    showToast(`Found user: ${user.name}`, false);
+                } catch (error) {
+                    searchResult.innerHTML = `
+                        <div class="text-center py-6 text-slate-400">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p>User not found</p>
+                            <p class="text-sm mt-1">Try a different ID (1-12)</p>
+                        </div>
+                    `;
+                    showToast('User not found');
+                }
+            }
+
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
+            });
+
+            // Dropdown selection
+            select.addEventListener('change', async (e) => {
+                if (!e.target.value) {
+                    selectedUserDetails.classList.add('hidden');
+                    return;
+                }
+
+                selectedUserDetails.innerHTML = '<div class="loading-pulse text-slate-400 text-center py-4">Loading user details...</div>';
+                selectedUserDetails.classList.remove('hidden');
+
+                try {
+                    const user = await getData(`https://developerapis.vercel.app/api/users/${e.target.value}`);
+                    selectedUserDetails.innerHTML = createDetailedUserView(user);
+                } catch (error) {
+                    selectedUserDetails.innerHTML = `
+                        <div class="text-center py-4 text-red-400">
+                            Failed to load user details
+                        </div>
+                    `;
+                    showToast('Failed to load user details');
+                }
+            });
+        }
+
+        // Start the app
+        init();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bcc843df5c77226',t:'MTc2ODIxOTQ2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
